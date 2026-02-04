@@ -1,17 +1,158 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="apple-touch-icon" sizes="180x180" href="src/assets/images/favicons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" href="src/assets/images/favicons/favicon-32x32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="src/assets/images/favicons/favicon-16x16.png" sizes="16x16">
-    <link rel="manifest" href="src/assets/images/favicons/manifest.json">
-    <link rel="mask-icon" href="src/assets/images/favicons/safari-pinned-tab.svg" color="#5bbad5">
-    <title>Dependency-Track</title>
-  </head>
-  <body style="background-color: #EFEFEF;">
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+<head>
+  <title>Smart Campus Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-box">
+  <h2>Smart Campus Login</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p id="error"></p>
+</div>
+
+<script src="script.js"></script>
+</body>
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Smart Campus Dashboard</h1>
+
+<h3>📢 Announcements</h3>
+<ul id="announcements"></ul>
+
+<script src="script.js"></script>
+<script>
+  loadAnnouncements();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attendance</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Student Attendance</h2>
+
+<input type="text" id="studentName" placeholder="Student Name">
+<select id="status">
+  <option value="Present">Present</option>
+  <option value="Absent">Absent</option>
+</select>
+
+<button onclick="markAttendance()">Submit</button>
+
+<h3>Attendance Records</h3>
+<ul id="records"></ul>
+
+<script src="script.js"></script>
+<script>
+  loadAttendance();
+</script>
+
+</body>
+</html>
+<a href="attendance.html">📋 Manage Attendance</a>
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  text-align: center;
+}
+
+.login-box {
+  width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 5px;
+}
+
+input {
+  width: 90%;
+  padding: 8px;
+  margin: 10px 0;
+}
+
+button {
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
+function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  fetch("http://localhost:3000/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = "dashboard.html";
+    } else {
+      document.getElementById("error").innerText = "Invalid Login";
+    }
+  });
+}
+
+function loadAnnouncements() {
+  fetch("http://localhost:3000/announcements")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("announcements");
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = item;
+        list.appendChild(li);
+      });
+    });
+}
+function markAttendance() {
+  const name = document.getElementById("studentName").value;
+  const status = document.getElementById("status").value;
+
+  fetch("http://localhost:3000/attendance", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, status })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Attendance Marked");
+    loadAttendance();
+  });
+}
+
+function loadAttendance() {
+  fetch("http://localhost:3000/attendance")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("records");
+      list.innerHTML = "";
+      data.forEach(a => {
+        const li = document.createElement("li");
+        li.innerText = `${a.name} - ${a.status} (${a.date})`;
+        list.appendChild(li);
+      });
+    });
+}
